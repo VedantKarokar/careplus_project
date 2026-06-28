@@ -12,7 +12,7 @@ load_dotenv()
 # -------------CONFIGURATION-------------
 
 db_config={
-    "user": os.getenv("MYSQL_USER"),
+    "user": os.getenv("MYSQL_ROOT_USER"),
     "host": os.getenv("MYSQL_HOST"),
     "port": os.getenv("MYSQL_PORT"),
     "database": os.getenv("MYSQL_DATABASE"),
