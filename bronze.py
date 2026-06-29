@@ -5,19 +5,10 @@ from dotenv import load_dotenv
 from io import StringIO
 from sqlalchemy import create_engine
 from datetime import datetime, timedelta
-from pydantic import BaseModel
 
 load_dotenv()
 
 # -------------CONFIGURATION-------------
-
-db_config={
-    "user": os.getenv("MYSQL_ROOT_USER"),
-    "host": os.getenv("MYSQL_HOST"),
-    "port": os.getenv("MYSQL_PORT"),
-    "database": os.getenv("MYSQL_DATABASE"),
-    "password": os.getenv("MYSQL_ROOT_PASSWORD")
-}
 
 aws_bucket="careplusstorage"
 aws_prefix="support-tickets/raw/"
@@ -31,8 +22,8 @@ aws_config={
 
 # -------------UTILITY FUNCTIONS-------------
 
-def get_engine(config):
-    return create_engine(f"mysql+pymysql://{config['user']}:{config['password']}@{config['host']}:{config['port']}/{config['database']}")
+def get_engine():
+    return create_engine(f"mysql+pymysql://{os.getenv("MYSQL_ROOT_USER")}:{os.getenv("MYSQL_ROOT_PASSWORD")}@{os.getenv("MYSQL_HOST")}:{os.getenv("MYSQL_PORT")}/{os.getenv("MYSQL_DATABASE")}")
 
 def upload_to_s3(df, bucket, key):
     # Buffer for AWS
@@ -63,7 +54,7 @@ def get_next_date(last_date_str):
 # -------------MAIN INGESTION LOGIC-------------
 
 def began_ingestion():
-    engine=get_engine(config=db_config)
+    engine=get_engine()
     last_date=read_last_date(file_path=date_file)
     next_date=get_next_date(last_date_str=last_date)
 
