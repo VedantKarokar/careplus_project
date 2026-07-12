@@ -15,9 +15,9 @@ aws_prefix="support-tickets/raw/"
 date_file="date_tracker.txt"
 
 aws_config={
-    "secret_key" : os.getenv("AWS_secret_key"),
-    "access_key" : os.getenv("AWS_access_key"),
-    "region" : os.getenv("AWS_region")
+    "secret_key" : 
+    "access_key" : 
+    "region" : 
 }
 
 # -------------UTILITY FUNCTIONS-------------
@@ -29,7 +29,11 @@ def upload_to_s3(df, bucket, key):
     # Buffer for AWS
     csv_buffer=StringIO()
     df.to_csv(csv_buffer, index=False)
-    s3=boto3.client('s3', config=aws_config)
+    s3=boto3.client(
+        's3', os.getenv("AWS_secret_key"),
+        os.getenv("AWS_access_key"),
+        os.getenv("AWS_region")
+        )
     s3.put_object(
         bucket=bucket,
         key=key,
