@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from io import StringIO
 from sqlalchemy import create_engine
 from boto3.s3.transfer import TransferConfig
+from datetime import datetime
 import logging
 
 logging.basicConfig(
@@ -47,10 +48,11 @@ def began_ingestion():
     if df.empty:
         print(f"No data found, skipping upload.")
     # upload to s3
-    s3_key = f"{aws_bucket}/{aws_prefix}"
+    timestamp = datetime.utcnow().strftime("%d%m%Y%H%M%S")
+    s3_key = f"{aws_prefix}{timestamp}.csv"
     return s3_upload(df, aws_bucket, s3_key)
 
 # Run
 # This block ONLY runs when you do: python bronze.py
-# if __name__ == "__main__":
-began_ingestion()
+if __name__ == "__main__":
+    began_ingestion()

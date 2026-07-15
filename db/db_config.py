@@ -103,4 +103,3 @@ with Session(engine, autoflush=False) as session:
                         sleep(2)
                         session.commit()
 print("-------------------------------------------------------")
-# sqlalchemy.exc.IntegrityError:
