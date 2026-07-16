@@ -1,0 +1,1 @@
+This a ETL pipeline, I am working with csv file and log files, of a made up cutomer support company called Careplus.
