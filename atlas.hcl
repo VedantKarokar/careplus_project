@@ -1,7 +1,8 @@
 data "external_schema" "sqlalchemy" {
     program = [
+        "uv", "run",
         "atlas-provider-sqlalchemy",
-        "--path", "./db_config.py",
+        "--path", "./db",
         "--dialect", "mysql"
     ]
 }

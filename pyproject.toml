@@ -11,5 +11,6 @@ dependencies = [
     "botocore==1.43.46",
     "dotenv==0.9.9",
     "pandas==3.0.3",
-    "SQLAlchemy==2.0.51"
+    "pymysql>=1.2.0",
+    "SQLAlchemy==2.0.51",
 ]
