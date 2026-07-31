@@ -1,7 +1,5 @@
 import os
 import pandas as pd
-from time import sleep
-from io import StringIO
 from typing import Optional
 from dotenv import load_dotenv
 from sqlalchemy import String
@@ -46,40 +44,33 @@ class Tickets(Base):
         def __repr__(self):
                 return f"Tickets(ticket_id={self.ticket_id!r}, created_at={self.created_at!r}, resolved_at={self.resolved_at!r}), agent={self.agent!r}, priority={self.priority!r}, num_interactions={self.num_interactions!r}, IssueCat={self.IssueCat!r}, channel={self.channel!r}, status={self.status!r}, agent_feedback={self.agent_feedback}"
 
-#Create an engine        
+#Create an engine
 engine=create_engine(f"mysql+pymysql://{os.getenv("MYSQL_ROOT_USER")}:{os.getenv("MYSQL_ROOT_PASSWORD")}@{os.getenv("MYSQL_HOST")}/{os.getenv("MYSQL_DATABASE")}", pool_pre_ping=True)
 
 #Create the table using defined data model and engine
 try:
         Base.metadata.create_all(engine)
 except exc.OperationalError as e:
-        print("Connection error, make sure your  docker container is running.")
-        print("If docker container is running without issues, please run the code again!")
+        e.add_note("Connection Lost")
+        raise
 
 #Add data
-BATCH_SIZE = 200
-try:
-        with Session(engine, autoflush=False) as session:
-                        with open("data.csv", "r") as f:
-                                data = f.read()
-                                data = StringIO(data)
-                                df = pd.read_csv(data, keep_default_na=False)
-                                data = df.to_dict(orient="records")
-                                x = 0
-                                for i in range(0, len(data), BATCH_SIZE):
-                                        batch = data[i : i + BATCH_SIZE]
-                                        session.execute(insert(Tickets), batch)
-                                        x += 1
-                                        print(f"Batch {x} uploaded")
-                                        session.commit()
-except FileNotFoundError as e:
-                print("Check the data file is in your project folder.")
-                raise
-except exc.OperationalError as e:
-                print("Connection error, make sure your  docker container is running.")
-                print("If docker container is running without issues, please run the code again!")
-                raise
-except exc.IntegrityError as e:
-                print("Data already exist. Duplicate data is not allowed.")
+def upload_data(batch_size, engine = engine):
+                with Session(engine, autoflush=False) as session:
+                        for x, frame in enumerate(pd.read_csv("data.csv", keep_default_na=False, chunksize=batch_size),start=1,):
+                                session.execute(insert(Tickets), frame.to_dict(orient="records"))
+                                session.commit()
+                                status = print(f"Batch {x} uploaded")
+                return status
 
-                        
+try:
+        upload_data(batch_size=200)
+except FileNotFoundError as e:
+        e.add_note("Check the data file is in your project folder.")
+        raise
+except exc.OperationalError as e:
+        e.add_note("Connection error, rerun the code")
+        raise
+except exc.IntegrityError as e:
+        e.add_note("Data already exists in database.")
+        raise

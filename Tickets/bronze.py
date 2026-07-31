@@ -4,21 +4,18 @@ import boto3
 from dotenv import load_dotenv
 from io import StringIO
 from sqlalchemy import create_engine
-from boto3.s3.transfer import TransferConfig
+# from boto3.s3.transfer import TransferConfig
 from datetime import datetime
 import logging
 
-logging.basicConfig(
-        filename="ingestion.log",
-        level=logging.ERROR,
-        format = "%(asctime)s - %(levelname)s - %(message)s",
-)
+logger = logging.getLogger(__name__)
+
 load_dotenv()
 
 aws_bucket="careplusstorage"
 aws_prefix="support_tickets/raw/"
 
-engine = create_engine(f"mysql+pymysql://{os.getenv("MYSQL_ROOT_USER")}:{os.getenv("MYSQL_ROOT_PASSWORD")}@{os.getenv("MYSQL_HOST")}:{os.getenv("MYSQL_PORT")}/{os.getenv("MYSQL_DATABASE")}",echo = True)
+engine = create_engine(f"mysql+pymysql://{os.getenv("MYSQL_ROOT_USER")}:{os.getenv("MYSQL_ROOT_PASSWORD")}@{os.getenv("MYSQL_HOST")}:{os.getenv("MYSQL_PORT")}/{os.getenv("MYSQL_DATABASE")}",pool_pre_ping=False)
 
 def s3_upload(df, bucket, key):
     # Buffer for AWS
