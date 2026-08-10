@@ -1,12 +1,20 @@
 import os
 import pandas as pd
 import boto3
+import logging
+from db import db_config
 from dotenv import load_dotenv
 from io import StringIO
 from sqlalchemy import create_engine
-# from boto3.s3.transfer import TransferConfig
+from sqlalchemy import select
+from sqlalchemy import exc
 from datetime import datetime
-import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    filename="Tickets/logs/bronze.log"
+)
 
 logger = logging.getLogger(__name__)
 
@@ -36,20 +44,23 @@ def s3_upload(df, bucket, key):
         Body=csv_buffer.getvalue()
         )
 
-def began_ingestion():
-    # Query data
-    query = f"""
-        SELECT * FROM Tickets;
-        """
-    df = pd.read_sql(sql=query, con=engine)
-    if df.empty:
-        print(f"No data found, skipping upload.")
-    # upload to s3
-    timestamp = datetime.utcnow().strftime("%d%m%Y%H%M%S")
-    s3_key = f"{aws_prefix}{timestamp}.csv"
-    return s3_upload(df, aws_bucket, s3_key)
+try:
+    def began_ingestion():
+        # Query data
+        query = select(db_config.Tickets)
+        df = pd.read_sql(sql=query, con=engine)
+        if df.empty:
+            print("No data found, skipping upload.")
+        # upload to s3
+        timestamp = datetime.now(datetime.astimezone.utc).strftime("%d%m%Y%H%M%S")
+        s3_key = f"{aws_prefix}{timestamp}.csv"
+        logger.info("Ingestion complete")
+        return s3_upload(df, aws_bucket, s3_key)
+    
+except exc.SQLAlchemyError:
+    logger.exception("Failed to read from database")
+    raise
 
-# Run
-# This block ONLY runs when you do: python bronze.py
-if __name__ == "__main__":
-    began_ingestion()
+except exc.ClientError:
+    logger.exception("Failed to upload to S3")
+    raise
