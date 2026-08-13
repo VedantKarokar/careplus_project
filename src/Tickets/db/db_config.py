@@ -9,12 +9,6 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy import exc
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    filename="Tickets/logs/db.log"
-)
-
 logger = logging.getLogger(__name__)
 
 #Load env variables
@@ -52,7 +46,6 @@ class Tickets(Base):
         
 #Create an engine
 engine=create_engine(f"mysql+pymysql://{os.getenv("MYSQL_ROOT_USER")}:{os.getenv("MYSQL_ROOT_PASSWORD")}@{os.getenv("MYSQL_HOST")}:{os.getenv("MYSQL_PORT")}/{os.getenv("MYSQL_DATABASE")}", pool_pre_ping=True)
-
 
 #Create the table using defined data model and engine
 try:

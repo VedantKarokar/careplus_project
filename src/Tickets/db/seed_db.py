@@ -6,13 +6,7 @@ from sqlalchemy import insert
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 from sqlalchemy import exc
-from db_config import Tickets
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    filename="Tickets/logs/db.log"
-)
+from src.Tickets.db.db_config import Tickets
 
 logger = logging.getLogger(__name__)
 

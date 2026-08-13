@@ -2,19 +2,13 @@ import os
 import pandas as pd
 import boto3
 import logging
-from db import db_config
+from src.Tickets.db import db_config
 from dotenv import load_dotenv
 from io import StringIO
 from sqlalchemy import create_engine
 from sqlalchemy import select
 from sqlalchemy import exc
 from datetime import datetime
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    filename="Tickets/logs/bronze.log"
-)
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +44,7 @@ try:
         query = select(db_config.Tickets)
         df = pd.read_sql(sql=query, con=engine)
         if df.empty:
+            logger.info("Data was not found, upload was skipped.")
             print("No data found, skipping upload.")
         # upload to s3
         timestamp = datetime.now(datetime.astimezone.utc).strftime("%d%m%Y%H%M%S")
