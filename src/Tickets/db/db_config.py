@@ -8,6 +8,9 @@ from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy import exc
+from logging_config.log_config import setup_logging
+
+setup_logging()
 
 logger = logging.getLogger(__name__)
 

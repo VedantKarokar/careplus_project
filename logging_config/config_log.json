@@ -35,14 +35,18 @@
         }
     },
     "loggers": {
-        "pipeline.tickets": {
+        "tickets": {
             "level": "DEBUG",
-            "handlers": ["tickets_file"],
+            "handlers": [
+                "tickets_file"
+            ],
             "propagate": false
         },
-        "pipeline.logs": {
+        "logs": {
             "level": "DEBUG",
-            "handlers": ["logs_file"],
+            "handlers": [
+                "logs_file"
+            ],
             "propagate": false
         },
     "root": {
