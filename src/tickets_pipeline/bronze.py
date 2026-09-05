@@ -1,16 +1,16 @@
 import os
 import pandas as pd
 import boto3
-import logging
-from src.Tickets.db import db_config
 from dotenv import load_dotenv
 from io import StringIO
 from sqlalchemy import create_engine
 from sqlalchemy import select
 from sqlalchemy import exc
 from datetime import datetime
+from logging_config import setup_logging
+from tickets_pipeline.db import Tickets
 
-logger = logging.getLogger(__name__)
+setup_logging(__name__)
 
 load_dotenv()
 
@@ -41,21 +41,21 @@ def s3_upload(df, bucket, key):
 try:
     def began_ingestion():
         # Query data
-        query = select(db_config.Tickets)
+        query = select(Tickets)
         df = pd.read_sql(sql=query, con=engine)
         if df.empty:
-            logger.info("Data was not found, upload was skipped.")
+            setup_logging().info("Data was not found, upload was skipped.")
             print("No data found, skipping upload.")
         # upload to s3
         timestamp = datetime.now(datetime.astimezone.utc).strftime("%d%m%Y%H%M%S")
         s3_key = f"{aws_prefix}{timestamp}.csv"
-        logger.info("Ingestion complete")
+        setup_logging().info("Ingestion complete")
         return s3_upload(df, aws_bucket, s3_key)
-    
+
 except exc.SQLAlchemyError:
-    logger.exception("Failed to read from database")
+    setup_logging().exception("Failed to read from database")
     raise
 
 except exc.ClientError:
-    logger.exception("Failed to upload to S3")
+    setup_logging().exception("Failed to upload to S3")
     raise
