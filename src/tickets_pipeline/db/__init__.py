@@ -1,1 +1,2 @@
-__all__ = ["db_config", "seed_db"]
+from .db_config import setup_logging
+from .seed_db import *

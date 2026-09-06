@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import logging
 from dotenv import load_dotenv
 from sqlalchemy import insert
 from sqlalchemy.orm import Session
@@ -8,7 +9,7 @@ from sqlalchemy import exc
 from tickets_pipeline.db.db_config import Tickets
 from logging_config.log_config import setup_logging
 
-setup_logging(__name__)
+logger = setup_logging(name = "tickets")
 
 #Load env variables
 load_dotenv()
@@ -27,16 +28,16 @@ def upload_data(batch_size, engine = engine):
 
 try:
         upload_data(batch_size=200)
-        setup_logging(__name__).info("Data was uploaded successfully")
+        logger.debug("Data was uploaded successfully")
+
 except FileNotFoundError as e:
-        e.add_note("Check the data file is in your project folder.")
-        setup_logging(__name__).error("File not found error occurred")
+        print("Check the data file is in your project folder.")
+        logger.error("File not found error occurred")
         
 except exc.OperationalError as e:
-        e.add_note("Connection error, rerun the code.")
-        setup_logging(__name__).error("Connection error occurred")
-        raise
+        print("Connection error, rerun the code.")
+        logger.error("Connection error occurred")
+
 except exc.IntegrityError as e:
-        e.add_note("Data already exists in database.")
-        setup_logging(__name__).error("Data was added in an already populated database")
-        raise
+        print("Data already exists in database.")
+        logger.error("Data was added in an already populated database")

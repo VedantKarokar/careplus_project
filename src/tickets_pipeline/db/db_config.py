@@ -9,6 +9,8 @@ from sqlalchemy.orm import mapped_column
 from sqlalchemy import exc
 from logging_config.log_config import setup_logging
 
+logger = setup_logging(name = "tickets")
+
 #Load env variables
 load_dotenv()
 
@@ -48,8 +50,7 @@ engine=create_engine(f"mysql+pymysql://{os.getenv("MYSQL_ROOT_USER")}:{os.getenv
 #Create the table using defined data model and engine
 try:
         Base.metadata.create_all(engine)
-        setup_logging(__name__).info("Successfully connected to the Database")
+        logger.debug("Successfully connected to the Database")
 except exc.OperationalError as e:
-        e.add_note("Connection Lost")
-        setup_logging(__name__).error(f"Error occured while connecting to database")
-        raise
+        print("Connection Lost")
+        logger.error(f"Error occured while connecting to database")
