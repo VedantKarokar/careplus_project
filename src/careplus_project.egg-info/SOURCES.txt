@@ -5,10 +5,13 @@ src/careplus_project.egg-info/SOURCES.txt
 src/careplus_project.egg-info/dependency_links.txt
 src/careplus_project.egg-info/requires.txt
 src/careplus_project.egg-info/top_level.txt
-src/db/__init__.py
-src/db/db_config.py
-src/db/seed_db.py
 src/logging_config/__init__.py
 src/logging_config/log_config.py
+src/logs_pipeline/__init__.py
+src/logs_pipeline/bronze.py
+src/tickets_pipeline/__init__.py
 src/tickets_pipeline/bronze.py
 src/tickets_pipeline/silver.py
+src/tickets_pipeline/db/__init__.py
+src/tickets_pipeline/db/db_config.py
+src/tickets_pipeline/db/seed_db.py

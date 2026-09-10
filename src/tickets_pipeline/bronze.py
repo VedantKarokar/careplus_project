@@ -11,7 +11,6 @@ from logging_config.log_config import setup_logging
 from tickets_pipeline.db import Tickets
 from botocore.exceptions import ClientError
 
-
 logger = setup_logging(name = "tickets")
 
 load_dotenv()
@@ -50,8 +49,7 @@ def began_ingestion():
             logger.debug("Data was not found, upload was skipped.")
             print("No data found, skipping upload.")
         # upload to s3
-        timestamp = datetime.now(timezone.utc).strftime("%d%m%Y%H%M%S")
-        s3_key = f"{aws_prefix}{timestamp}.csv"
+        s3_key = f"{aws_prefix}tickets.csv"
         return s3_upload(df, aws_bucket, s3_key)
 
 try:
