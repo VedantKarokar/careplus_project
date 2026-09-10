@@ -20,12 +20,12 @@ aws_prefix="support_tickets/raw/"
 engine = create_engine(f"mysql+pymysql://{os.getenv("MYSQL_ROOT_USER")}:{os.getenv("MYSQL_ROOT_PASSWORD")}@{os.getenv("MYSQL_HOST")}:{os.getenv("MYSQL_PORT")}/{os.getenv("MYSQL_DATABASE")}",pool_pre_ping=False)
 
 def s3_upload(df, bucket, key):
-    # Buffer for AWS
-    csv_buffer=StringIO()
+    # Buffer(file like object on memory) for AWS
+    csv_buffer = StringIO()
     df.to_csv(
         csv_buffer,
         index=False
-        )
+        )  # we write to the file like object created on memory
     s3=boto3.client(
         service_name='s3'
         )
@@ -35,10 +35,11 @@ def s3_upload(df, bucket, key):
     s3.put_object(
         Bucket=bucket,
         Key=key,
-        Body=csv_buffer.getvalue()
+        Body=csv_buffer.getvalue() # retrieve contents as a string
         )
 
 def began_ingestion():
+        logger.info("Bronze layer ingestion started for tickets_pipeline")
         # Query data
         query = select(Tickets)
         df = pd.read_sql(sql=query, con=engine)
@@ -52,7 +53,7 @@ def began_ingestion():
 
 try:
     began_ingestion()
-    logger.debug("Ingestion complete")
+    logger.info("Files Successfully Ingested.")
 
 except exc.SQLAlchemyError:
     logger.exception("Failed to read from database")
