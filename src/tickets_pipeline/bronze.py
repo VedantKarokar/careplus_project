@@ -9,6 +9,8 @@ from sqlalchemy import exc
 from datetime import datetime, timezone
 from logging_config.log_config import setup_logging
 from tickets_pipeline.db import Tickets
+from botocore.exceptions import ClientError
+
 
 logger = setup_logging(name = "tickets")
 
@@ -25,7 +27,7 @@ def s3_upload(df, bucket, key):
     df.to_csv(
         csv_buffer,
         index=False
-        )  # we write to the file like object created on memory
+        )  # We write to the file like object created on memory
     s3=boto3.client(
         service_name='s3'
         )
@@ -35,7 +37,8 @@ def s3_upload(df, bucket, key):
     s3.put_object(
         Bucket=bucket,
         Key=key,
-        Body=csv_buffer.getvalue() # retrieve contents as a string
+        Body=csv_buffer.getvalue(), # Retrieve contents as a string
+        IfNoneMatch='*'  # Fails if key already exists
         )
 
 def began_ingestion():
@@ -56,7 +59,12 @@ try:
     logger.info("Files Successfully Ingested.")
 
 except exc.SQLAlchemyError:
-    logger.exception("Failed to read from database")
+    logger.error("Failed to read from database")
 
-except boto3.exceptions.ClientError:
-    logger.exception("Failed to upload to S3")
+except ClientError as e:
+    if e.response['Error']['Code'] in ('412', 'PreconditionFailed'):
+        print("Duplicate object detected! Ingestion stopped.")
+        logger.debug("Data already exists, ingestion stopped.")
+    else:
+        logger.exception("Failed to upload to S3")
+        raise
