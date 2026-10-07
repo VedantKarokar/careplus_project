@@ -1,5 +1,6 @@
 README.md
 pyproject.toml
+src/aws_config/tickets_lambda_setup.py
 src/careplus_project.egg-info/PKG-INFO
 src/careplus_project.egg-info/SOURCES.txt
 src/careplus_project.egg-info/dependency_links.txt

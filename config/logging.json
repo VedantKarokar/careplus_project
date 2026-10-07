@@ -48,12 +48,12 @@
                 "logs_file"
             ],
             "propagate": false
-        },
+        }
+    },
     "root": {
             "level": "DEBUG", 
             "handlers": [
                 "stderr"
             ]
         }
-    }
 }

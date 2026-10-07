@@ -3,41 +3,31 @@ import pandas as pd
 import boto3
 from dotenv import load_dotenv
 from io import StringIO
-from sqlalchemy import create_engine
 from sqlalchemy import select
 from sqlalchemy import exc
-from datetime import datetime, timezone
 from logging_config.log_config import setup_logging
-from tickets_pipeline.db import Tickets
+from tickets_pipeline.db.db_config import Tickets, engine
 from botocore.exceptions import ClientError
 
 logger = setup_logging(name = "tickets")
 
 load_dotenv()
 
-aws_bucket="careplusstorage"
-aws_prefix="support_tickets/raw/"
-
-engine = create_engine(f"mysql+pymysql://{os.getenv("MYSQL_ROOT_USER")}:{os.getenv("MYSQL_ROOT_PASSWORD")}@{os.getenv("MYSQL_HOST")}:{os.getenv("MYSQL_PORT")}/{os.getenv("MYSQL_DATABASE")}",pool_pre_ping=False)
-
 def s3_upload(df, bucket, key):
     # Buffer(file like object on memory) for AWS
     csv_buffer = StringIO()
     df.to_csv(
         csv_buffer,
-        index=False
+        index = False
         )  # We write to the file like object created on memory
     s3=boto3.client(
-        service_name='s3'
-        )
-    boto3.s3.transfer.TransferConfig(
-        multipart_chunksize=2
+        service_name = 's3'
         )
     s3.put_object(
-        Bucket=bucket,
-        Key=key,
-        Body=csv_buffer.getvalue(), # Retrieve contents as a string
-        IfNoneMatch='*'  # Fails if key already exists
+        Bucket = bucket,
+        Key = key,
+        Body = csv_buffer.getvalue(), # Retrieve contents as a string
+        IfNoneMatch = '*'  # Fails if key already exists
         )
 
 def began_ingestion():
@@ -47,10 +37,10 @@ def began_ingestion():
         df = pd.read_sql(sql=query, con=engine)
         if df.empty:
             logger.debug("Data was not found, upload was skipped.")
-            print("No data found, skipping upload.")
-        # upload to s3
-        s3_key = f"{aws_prefix}tickets.csv"
-        return s3_upload(df, aws_bucket, s3_key)
+        else:
+            # upload to s3
+            s3_key = f"support_tickets/raw/tickets.csv"
+            return s3_upload(df = df, bucket = os.getenv("AWS_BUCKET"), key = s3_key)
 
 try:
     began_ingestion()
@@ -58,6 +48,7 @@ try:
 
 except exc.SQLAlchemyError:
     logger.error("Failed to read from database")
+    raise
 
 except ClientError as e:
     if e.response['Error']['Code'] in ('412', 'PreconditionFailed'):

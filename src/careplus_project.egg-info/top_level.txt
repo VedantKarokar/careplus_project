@@ -1,3 +1,4 @@
+aws_config
 logging_config
 logs_pipeline
 tickets_pipeline
