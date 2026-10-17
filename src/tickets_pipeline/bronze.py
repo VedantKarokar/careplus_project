@@ -30,7 +30,7 @@ def s3_upload(df, bucket, key):
         IfNoneMatch = '*'  # Fails if key already exists
         )
 
-def began_ingestion():
+def begin_ingestion():
         logger.info("Bronze layer ingestion started for tickets_pipeline")
         # Query data
         query = select(Tickets)
@@ -43,7 +43,7 @@ def began_ingestion():
             return s3_upload(df = df, bucket = os.getenv("AWS_BUCKET"), key = s3_key)
 
 try:
-    began_ingestion()
+    begin_ingestion()
     logger.info("Files Successfully Ingested.")
 
 except exc.SQLAlchemyError:

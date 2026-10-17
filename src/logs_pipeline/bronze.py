@@ -21,12 +21,11 @@ def s3_upload(bucket, key, body):
         IfNoneMatch = '*'  # Fails if key already exists
         )
 
-def began_ingestion():
+def begin_ingestion():
     logger.info("Bronze layer ingestion started for logs_pipeline")
     start_date = date(2025, 6, 30)
-    csv_buffer = BytesIO()
     for i in range(1,32):
-
+        csv_buffer = BytesIO()
         new_date = start_date + timedelta(days = i)
 
         filepath = f"data/log_data/support_logs_{new_date}.log"
@@ -43,7 +42,7 @@ def began_ingestion():
         print(f"File {new_date} ingested.")
 
 try:
-    began_ingestion()
+    begin_ingestion()
     logger.info("Files Successfully Ingested.")
 
 except ClientError as e:

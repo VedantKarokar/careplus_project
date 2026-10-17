@@ -9,6 +9,7 @@ data "external_schema" "sqlalchemy" {
 
 env "sqlalchemy" {
     src = data.external_schema.sqlalchemy.url
+    url = getenv("MIGRATION_DB_URL")
     dev = "docker://mysql/8/dev"
     migration {
         dir = "file://src/tickets_pipeline/db/migrations"

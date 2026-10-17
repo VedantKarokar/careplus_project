@@ -35,6 +35,4 @@ except exc.OperationalError as e:
         logger.error("Connection error occurred")
 
 except exc.IntegrityError as e:
-        print("Data already exists in database.")
-        logger.error("Data was added in an already populated database")
-        pass
+        logger.error("Data already exists in database.")

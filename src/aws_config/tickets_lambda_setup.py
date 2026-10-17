@@ -12,7 +12,6 @@ lambda_client = boto3.client('lambda')
 s3_client = boto3.client('s3')
 s3_resource = boto3.resource('s3')
 function_name = 'tickets_transformation'
-bucket_name = os.getenv("AWS_BUCKET")
 s3_key = 'support_tickets/raw/tickets.csv'
 
 def create_trigger(lambda_func_name , s3_bucket_name):
@@ -48,9 +47,11 @@ def create_trigger(lambda_func_name , s3_bucket_name):
     )
 
 try:
-    create_trigger(lambda_func_name = function_name, s3_bucket_name = bucket_name)
+    create_trigger(lambda_func_name = function_name, s3_bucket_name = os.getenv("AWS_BUCKET"))
 except ClientError as e:
     error_code = e.response['Error']['Code']
     if error_code == 'ResourceConflictException':
         logger.debug("Trigger created already.")
         pass
+    else:
+        raise

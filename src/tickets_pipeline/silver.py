@@ -5,6 +5,7 @@ import pandas as pd
 import pyarrow      # added to get the output data in parquet
 from io import StringIO
 from dotenv import load_dotenv
+from botocore.exceptions import ClientError
 from logging_config.log_config import setup_logging
 
 logger = setup_logging(name = "tickets")
@@ -32,9 +33,18 @@ def read_data(bucket, key):
 
 def lambda_handler(event, context):
     # Extract bucket name and object key
-    source_key = event["Records"][0]["object"]["key"]
-    source_bucket = event["Records"][0]["bucket"]["name"]
+    source_key = "support_tickets/raw/tickets.csv"
+    source_bucket = "careplusstorage"
     target_key = "support_tickets/processed/tickets.parquet"
+
+    # Check if processed output already exists
+    try:
+            s3_resource.Object(source_bucket, target_key).load()
+            print("Processed output already exists. Skipping.")
+            return
+    except ClientError as e:
+         if e.response["Error"]["Code"] != "404":
+              raise
 
     # Access data from S3
     raw_content = read_data(bucket = source_bucket, key = source_key)
