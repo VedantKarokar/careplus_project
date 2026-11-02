@@ -12,7 +12,6 @@ logger = setup_logging(name = "tickets")
 #Load env variables
 load_dotenv()
 
-
 #Add data
 def upload_data(batch_size, engine = engine):
                 with Session(engine, autoflush=False) as session:

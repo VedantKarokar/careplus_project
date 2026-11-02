@@ -54,6 +54,6 @@ def lambda_handler(event, context):
 
     # Ingest again
     s3_resource.Object(source_bucket, target_key).put(
-        Body = transformed_data,
-        ContentType = 'application/octet-stream'
-    )
+         Body = transformed_data,
+         ContentType = 'application/octet-stream'
+        )

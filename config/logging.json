@@ -15,6 +15,7 @@
             "class": "logging.StreamHandler",
             "level": "WARNING",
             "formatter": "simple",
+            "filename": "logs/aws_infra_logs.log",
             "stream": "ext://sys.stderr"
         },
         "tickets_file": {
