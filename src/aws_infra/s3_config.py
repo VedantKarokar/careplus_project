@@ -9,26 +9,27 @@ class S3Bucket:
         self.bucket = bucket
         self.region = region
         self.client = bt3.client('s3', region_name=region)
+        pass
 
     def create(self, **kwargs):
         try:
             return self.client.create_bucket(
-                Bucket=self.bucket,
-                CreateBucketConfiguration={'LocationConstraint': self.region},
+                Bucket = self.bucket,
+                CreateBucketConfiguration = {'LocationConstraint': self.region},
                 **kwargs,
             )
         except ClientError as e:
             logger.error("Failed to create bucket %s: %s", self.bucket, e)
             raise
 
-    def upload(self, key, body, content_type='application/octet-stream', if_none_match='*', **kwargs):
+    def upload(self, body, key, content_type = 'application/octet-stream', if_none_match = '*', **kwargs):
         try:
             return self.client.put_object(
-                Body=body,
-                Bucket=self.bucket,
-                Key=key,
-                ContentType=content_type,
-                IfNoneMatch=if_none_match,
+                Body = body,
+                Key = key,
+                Bucket = self.bucket,
+                ContentType = content_type,
+                IfNoneMatch = if_none_match,
                 **kwargs,
             )
         except ClientError as e:

@@ -8,26 +8,22 @@ from sqlalchemy import exc
 from logging_config.log_config import setup_logging
 from tickets_pipeline.db.db_config import Tickets, engine
 from botocore.exceptions import ClientError
+from aws_infra.s3_config import S3Bucket
 
 logger = setup_logging(name = "tickets")
 
 load_dotenv()
 
-def s3_upload(df, bucket, key):
+def upload_data(data, key):
     # Buffer(file like object on memory) for AWS
     csv_buffer = StringIO()
-    df.to_csv(
+    data.to_csv(
         csv_buffer,
         index = False
         )  # We write to the file like object created on memory
-    s3=boto3.client(
-        service_name = 's3'
-        )
-    s3.put_object(
-        Bucket = bucket,
-        Key = key,
-        Body = csv_buffer.getvalue(), # Retrieve contents as a string
-        IfNoneMatch = '*'  # Fails if key already exists
+    S3Bucket.upload(
+        key = key,
+        body = csv_buffer.getvalue()
         )
 
 def begin_ingestion():
@@ -40,7 +36,9 @@ def begin_ingestion():
         else:
             # upload to s3
             s3_key = f"support_tickets/raw/tickets.csv"
-            return s3_upload(df = df, bucket = os.getenv("AWS_BUCKET"), key = s3_key)
+            return upload_data(df = df,
+                             key = s3_key
+                             )
 
 try:
     begin_ingestion()
